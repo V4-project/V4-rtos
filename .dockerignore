@@ -1,0 +1,20 @@
+# Build artifacts
+build/
+build-*/
+**/build/
+
+# Git
+.git/
+.github/
+
+# IDE
+.vscode/
+.idea/
+
+# Documentation
+docs/
+
+# Temporary files
+*.swp
+*.swo
+*~

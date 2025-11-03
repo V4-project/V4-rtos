@@ -18,6 +18,10 @@ help:
 	@echo "  esp32c6       - Build ESP32-C6 runtime"
 	@echo "  size          - Show firmware sizes for all BSPs"
 	@echo ""
+	@echo "Variables:"
+	@echo "  DOCKER=1      - Use Docker for ESP32-C6 build"
+	@echo "                  Example: make esp32c6 DOCKER=1"
+	@echo ""
 
 # Build (default: debug, override with CMAKE_BUILD_TYPE=Release)
 BUILD_TYPE ?= Debug
@@ -90,10 +94,23 @@ ubsan: clean
 
 # Build ESP32-C6 runtime
 esp32c6:
-	@echo "📱 Building ESP32-C6 runtime..."
+ifeq ($(DOCKER),1)
+	@echo "📱 Building ESP32-C6 runtime (Docker)..."
+	@if ! command -v docker >/dev/null 2>&1; then \
+		echo "❌ Docker not found. Please install Docker first."; \
+		exit 1; \
+	fi
+	@docker compose run --rm esp-idf idf.py build
+	@echo "✅ ESP32-C6 runtime build complete!"
+	@echo ""
+	@echo "To flash (Docker):"
+	@echo "  docker compose run --rm esp-idf idf.py flash monitor"
+else
+	@echo "📱 Building ESP32-C6 runtime (native)..."
 	@if [ -z "$$IDF_PATH" ]; then \
-		echo "❌ ESP-IDF not found. Source it first:"; \
-		echo "   . $$HOME/esp/esp-idf/export.sh"; \
+		echo "❌ ESP-IDF not found. Please either:"; \
+		echo "   1. Source ESP-IDF: . $$HOME/esp/esp-idf/export.sh"; \
+		echo "   2. Use Docker: make esp32c6 DOCKER=1"; \
 		exit 1; \
 	fi
 	@cd bsp/esp32c6/runtime && idf.py build
@@ -101,6 +118,7 @@ esp32c6:
 	@echo ""
 	@echo "To flash:"
 	@echo "  cd bsp/esp32c6/runtime && idf.py flash monitor"
+endif
 
 # Show firmware sizes for all BSPs
 size:
