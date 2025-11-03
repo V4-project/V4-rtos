@@ -11,11 +11,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Build options
-option(V4_BUILD_KERNEL "Build kernel" ON)
-option(V4_BUILD_HAL "Build HAL" ON)
-option(V4_BUILD_COMPILER "Build compiler" ON)
-option(V4_BUILD_SHELL "Build shell" ON)
-option(V4_BUILD_PROTOCOL "Build protocol" ON)
+option(V4_BUILD_KERNEL "Build kernel (required)" ON)
+option(V4_BUILD_HAL "Build HAL (required)" ON)
+option(V4_BUILD_COMPILER "Build compiler (optional)" OFF)
+option(V4_BUILD_SHELL "Build shell (optional)" OFF)
+option(V4_BUILD_PROTOCOL "Build protocol (optional)" OFF)
 option(V4_BUILD_TESTS "Build tests" OFF)
 option(V4_BUILD_EXAMPLES "Build examples" OFF)
 

@@ -1,5 +1,7 @@
 # V4 HAL (Hardware Abstraction Layer)
 
+**Status**: Core Component (Required)
+
 Unified hardware abstraction layer for V4 RTOS using C++17 CRTP for zero-overhead platform independence.
 
 ## Features

@@ -10,10 +10,16 @@ V4 RTOS is a lightweight, preemptive real-time operating system for resource-con
 
 ## Features
 
+### Core (Required)
+
 - **Preemptive Multitasking** - 8 tasks, <100μs context switch
 - **Message Passing** - Inter-task communication with 16-message queue
-- **Interactive REPL** - Live Forth programming on device
 - **Hardware Abstraction** - Unified HAL across platforms
+
+### Optional Components
+
+- **Forth Compiler** - Compile Forth source to V4 bytecode
+- **Interactive REPL** - Live Forth programming on device
 - **Protocol Stack** - V4-link for OTA updates
 - **JIT Compilation** - Runtime optimization (planned)
 
@@ -35,14 +41,17 @@ See [Getting Started Guide](docs/getting-started.md) for detailed instructions.
 
 ```
 V4 RTOS
-├── kernel/      VM core + scheduler (42KB)
-├── hal/         Hardware abstraction (5.7KB)
-├── compiler/    Forth → bytecode
-├── shell/       Interactive REPL (91KB)
-├── protocol/    V4-link protocol (1.5KB)
+├── kernel/      VM core + scheduler (42KB) [required]
+├── hal/         Hardware abstraction (5.7KB) [required]
+├── compiler/    Forth → bytecode [optional]
+├── shell/       Interactive REPL (91KB) [optional]
+├── protocol/    V4-link protocol (1.5KB) [optional]
 ├── bsp/         Board support packages
 └── tools/       Development CLI
 ```
+
+**Minimum Configuration**: kernel + hal (~48KB)
+**Full Configuration**: All components (~140KB)
 
 ## Supported Platforms
 
@@ -101,17 +110,22 @@ See [Building Guide](docs/building.md) for detailed instructions.
 
 ## Components
 
+### Core Components (Required)
+
 - **[kernel/](kernel/)** - VM core + preemptive scheduler
 - **[hal/](hal/)** - C++17 CRTP hardware abstraction
+- **[bsp/](bsp/)** - Board support packages
+
+### Optional Components
+
 - **[compiler/](compiler/)** - Forth-to-bytecode compiler
 - **[shell/](shell/)** - Interactive REPL
 - **[protocol/](protocol/)** - V4-link bytecode transfer
-- **[bsp/](bsp/)** - Board support packages
 - **[tools/](tools/)** - CLI development tools
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome! Currently in active development - please open an issue to discuss before submitting pull requests.
 
 ## License
 

@@ -1,5 +1,7 @@
 # V4 Kernel
 
+**Status**: Core Component (Required)
+
 The V4 kernel provides the core virtual machine, preemptive scheduler, and task management functionality for V4 RTOS.
 
 ## Features

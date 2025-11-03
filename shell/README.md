@@ -1,6 +1,10 @@
 # V4 Shell (V4-repl)
 
+**Status**: Optional Component
+
 Interactive Read-Eval-Print Loop (REPL) for V4 RTOS, enabling live Forth programming on embedded devices.
+
+**Note**: This component is optional. You can run V4 RTOS without the interactive shell, using only pre-compiled applications.
 
 ## Features
 

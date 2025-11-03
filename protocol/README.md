@@ -1,6 +1,10 @@
 # V4 Protocol (V4-link)
 
+**Status**: Optional Component
+
 Bytecode transfer protocol for V4 RTOS, enabling over-the-air (OTA) updates and remote code loading.
+
+**Note**: This component is optional. You can use V4 RTOS without the transfer protocol, flashing code directly via standard methods.
 
 ## Features
 

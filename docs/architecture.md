@@ -15,18 +15,18 @@ V4 RTOS is a lightweight, preemptive real-time operating system built around a s
 └──────────────────┬──────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────┐
-│              Shell (REPL)                       │
+│       Shell (REPL) [OPTIONAL]                   │
 │        Interactive Development                  │
 │              (91 KB)                            │
 └──────────────────┬──────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────┐
-│            Compiler (V4-front)                  │
+│      Compiler (V4-front) [OPTIONAL]             │
 │         Forth → Bytecode                        │
 └──────────────────┬──────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────┐
-│        Kernel (VM + Scheduler)                  │
+│        Kernel (VM + Scheduler) [CORE]           │
 │                                                 │
 │  ┌─────────────┐  ┌──────────────┐            │
 │  │  V4 VM      │  │  Scheduler   │            │
@@ -39,7 +39,7 @@ V4 RTOS is a lightweight, preemptive real-time operating system built around a s
 └──────────────────┬──────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────┐
-│          HAL (Hardware Abstraction)             │
+│    HAL (Hardware Abstraction) [CORE]            │
 │    GPIO | UART | Timer | Interrupt              │
 │               (5.7 KB)                          │
 └──────────────────┬──────────────────────────────┘
@@ -50,6 +50,10 @@ V4 RTOS is a lightweight, preemptive real-time operating system built around a s
 │      (ESP-IDF, POSIX, CH32V, etc.)             │
 └─────────────────────────────────────────────────┘
 ```
+
+**Component Categories:**
+- **[CORE]**: Required components (kernel + hal)
+- **[OPTIONAL]**: Can be excluded for minimal builds
 
 ## Core Components
 
@@ -270,13 +274,15 @@ User Input → REPL → Compiler → Bytecode → VM → HAL → Hardware
 
 ### Memory Footprint
 
-| Component | Flash | RAM |
-|-----------|-------|-----|
-| Kernel    | 42 KB | 8 KB (per task) |
-| HAL       | 5.7 KB | 512 B |
-| Compiler  | 35 KB | 4 KB |
-| Shell     | 91 KB | 16 KB |
-| **Total** | **174 KB** | **96 KB** |
+| Component | Flash | RAM | Required |
+|-----------|-------|-----|----------|
+| Kernel    | 42 KB | 8 KB (per task) | Yes |
+| HAL       | 5.7 KB | 512 B | Yes |
+| Compiler  | 35 KB | 4 KB | No |
+| Shell     | 91 KB | 16 KB | No |
+| Protocol  | 1.5 KB | 2 KB | No |
+| **Minimum** | **~48 KB** | **~8.5 KB** | - |
+| **Full** | **~175 KB** | **~96 KB** | - |
 
 ### Timing
 

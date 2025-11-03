@@ -1,6 +1,10 @@
 # V4 Compiler (V4-front)
 
+**Status**: Optional Component
+
 Forth-to-bytecode compiler for V4 RTOS, translating Forth source code into executable V4 VM bytecode.
+
+**Note**: This component is optional. You can use V4 RTOS with pre-compiled bytecode or by calling C APIs directly from your application.
 
 ## Features
 
