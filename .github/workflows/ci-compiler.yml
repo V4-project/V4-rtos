@@ -5,13 +5,11 @@ on:
     branches: [ main, develop ]
     paths:
       - 'compiler/**'
-      - 'kernel/**'
       - '.github/workflows/ci-compiler.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'compiler/**'
-      - 'kernel/**'
       - '.github/workflows/ci-compiler.yml'
 
 jobs:

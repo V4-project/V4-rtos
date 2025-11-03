@@ -5,15 +5,11 @@ on:
     branches: [ main, develop ]
     paths:
       - 'shell/**'
-      - 'kernel/**'
-      - 'compiler/**'
       - '.github/workflows/ci-shell.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'shell/**'
-      - 'kernel/**'
-      - 'compiler/**'
       - '.github/workflows/ci-shell.yml'
 
 jobs:
