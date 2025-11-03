@@ -12,6 +12,8 @@ services:
       - ../V4:/v4:ro
       # Mount V4-hal (required for HAL implementation)
       - ../V4-hal:/v4-hal:ro
+      # Mount V4-link (required for bytecode protocol)
+      - ../V4-link:/v4-link:ro
       # Mount SSH keys for git operations (optional)
       - ~/.ssh:/root/.ssh:ro
       # Persistent build cache
@@ -20,6 +22,7 @@ services:
       # Set V4 paths for build system
       - V4_PATH=/v4
       - V4_HAL_PATH=/v4-hal
+      - V4_LINK_PATH=/v4-link
     working_dir: /project/bsp/esp32c6/runtime
     command: /bin/bash
     tty: true

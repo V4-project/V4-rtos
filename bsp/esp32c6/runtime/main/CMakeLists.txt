@@ -8,9 +8,9 @@
 # V4 Kernel Integration
 # ==============================================================================
 
-# Try multiple possible locations for V4 and V4-hal 1. Docker: /v4 and /v4-hal
-# (docker-compose volume mounts) 2. CI: runtime/_deps/V4 (GitHub Actions) 3. Local:
-# ../../../../V4 (parent directories)
+# Try multiple possible locations for V4, V4-hal, and V4-link 1. Docker: /v4 and
+# /v4-hal (docker-compose volume mounts) 2. CI: runtime/_deps/V4 (GitHub Actions) 3.
+# Local: ../../../../V4 (parent directories)
 
 set(V4_DIR_DOCKER "/v4")
 set(V4_DIR_CI "${CMAKE_CURRENT_SOURCE_DIR}/../_deps/V4")
@@ -18,6 +18,9 @@ set(V4_DIR_LOCAL "${CMAKE_CURRENT_SOURCE_DIR}/../../../../V4")
 set(V4HAL_DIR_DOCKER "/v4-hal")
 set(V4HAL_DIR_CI "${CMAKE_CURRENT_SOURCE_DIR}/../_deps/V4-hal")
 set(V4HAL_DIR_LOCAL "${CMAKE_CURRENT_SOURCE_DIR}/../../../../V4-hal")
+set(V4LINK_DIR_DOCKER "/v4-link")
+set(V4LINK_DIR_CI "${CMAKE_CURRENT_SOURCE_DIR}/../_deps/V4-link")
+set(V4LINK_DIR_LOCAL "${CMAKE_CURRENT_SOURCE_DIR}/../../../../V4-link")
 
 # Check V4 location
 if(EXISTS "${V4_DIR_DOCKER}/include/v4/vm_api.h")
@@ -55,6 +58,25 @@ else()
       "  - ${V4HAL_DIR_LOCAL} (local build)")
 endif()
 
+# Check V4-link location
+if(EXISTS "${V4LINK_DIR_DOCKER}/include/v4link/link.hpp")
+  set(V4LINK_DIR "${V4LINK_DIR_DOCKER}")
+  message(STATUS "Found V4-link at ${V4LINK_DIR} (Docker location)")
+elseif(EXISTS "${V4LINK_DIR_CI}/include/v4link/link.hpp")
+  set(V4LINK_DIR "${V4LINK_DIR_CI}")
+  message(STATUS "Found V4-link at ${V4LINK_DIR} (CI location)")
+elseif(EXISTS "${V4LINK_DIR_LOCAL}/include/v4link/link.hpp")
+  set(V4LINK_DIR "${V4LINK_DIR_LOCAL}")
+  message(STATUS "Found V4-link at ${V4LINK_DIR} (local location)")
+else()
+  message(
+    FATAL_ERROR
+      "V4-link not found. Please clone V4-link repository to:\n"
+      "  - ${V4LINK_DIR_DOCKER} (Docker build)\n"
+      "  - ${V4LINK_DIR_CI} (CI build)\n"
+      "  - ${V4LINK_DIR_LOCAL} (local build)")
+endif()
+
 # V4 source files (minimal set for runtime)
 set(V4_SRCS
     "${V4_DIR}/src/core.cpp"
@@ -76,21 +98,32 @@ set(V4HAL_SRCS
     "${V4HAL_DIR}/src/bridge/hal_console_bridge.cpp"
     "${V4HAL_DIR}/ports/esp32/platform_esp32.cpp")
 
+# V4-link source files
+set(V4LINK_SRCS
+    "${V4LINK_DIR}/src/link.cpp"
+    "${V4LINK_DIR}/src/link_c_api.cpp"
+    "${V4LINK_DIR}/src/frame.cpp"
+    "${V4LINK_DIR}/src/crc8.cpp")
+
 # ==============================================================================
 # Component Registration
 # ==============================================================================
 
 idf_component_register(
   SRCS
-  "main.c"
+  "main.cpp"
+  "v4_link_port.cpp"
+  "v4_task_platform_esp32.cpp"
   ${V4_SRCS}
   ${V4HAL_SRCS}
+  ${V4LINK_SRCS}
   INCLUDE_DIRS
   "."
   "../../boards"
   "${V4_DIR}/include"
   "${V4HAL_DIR}/include"
   "${V4HAL_DIR}/ports/esp32"
+  "${V4LINK_DIR}/include"
   REQUIRES
   driver
   freertos

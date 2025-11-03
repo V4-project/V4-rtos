@@ -1,12 +1,12 @@
 /**
- * @file main.c
+ * @file main.cpp
  * @brief V4 RTOS Runtime for ESP32-C6
  *
  * This runtime provides:
  * - V4 VM initialization with kernel APIs
  * - Preemptive task scheduler (10ms time slice)
  * - HAL initialization for peripherals
- * - Bytecode reception via UART (V4-link protocol - future)
+ * - Bytecode reception via USB Serial/JTAG (V4-link protocol)
  * - Bytecode execution
  *
  * Flash this once to the device, then send bytecode from host using v4_cli.
@@ -14,12 +14,14 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0
  */
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 // Board definitions
+extern "C" {
 #include "nanoc6/board.h"
 #include "nanoc6/peripherals.h"
+}
 
 // V4 kernel APIs
 #include "v4/task.h"
@@ -28,14 +30,16 @@
 // V4-hal APIs
 #include "v4/hal.h"
 
+// V4-link port
+#include "v4_link_port.hpp"
+
 // ESP-IDF APIs
 #include "driver/gpio.h"
-#include "driver/uart.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-static const char *TAG = "v4-runtime";
+static const char* TAG = "v4-runtime";
 
 // ==============================================================================
 // VM Memory Configuration
@@ -59,7 +63,10 @@ static const char *TAG = "v4-runtime";
 static uint8_t vm_arena[VM_ARENA_SIZE] __attribute__((aligned(4)));
 
 /** Global VM instance */
-static struct Vm *g_vm = NULL;
+static struct Vm* g_vm = nullptr;
+
+/** Global V4-link port instance */
+static v4rtos::Esp32c6LinkPort* g_link = nullptr;
 
 // ==============================================================================
 // V4 VM Initialization
@@ -73,21 +80,19 @@ static struct Vm *g_vm = NULL;
  *
  * @return 0 on success, negative error code on failure
  */
-static int v4_init(void)
-{
+static int v4_init(void) {
   // Configure VM with static arena
   VmConfig config = {
       .mem = vm_arena,
       .mem_size = VM_ARENA_SIZE,
-      .mmio = NULL,  // No MMIO windows for now
+      .mmio = nullptr,  // No MMIO windows for now
       .mmio_count = 0,
-      .arena = NULL  // Use malloc for word names (ESP-IDF heap)
+      .arena = nullptr  // Use malloc for word names (ESP-IDF heap)
   };
 
   // Create VM instance
   g_vm = vm_create(&config);
-  if (g_vm == NULL)
-  {
+  if (g_vm == nullptr) {
     ESP_LOGE(TAG, "Failed to create VM instance");
     return -1;
   }
@@ -96,8 +101,7 @@ static int v4_init(void)
 
   // Initialize task system with 10ms time slice
   v4_err err = vm_task_init(g_vm, 10);
-  if (err != 0)
-  {
+  if (err != 0) {
     ESP_LOGE(TAG, "Failed to initialize task system: %d", err);
     return -2;
   }
@@ -105,41 +109,6 @@ static int v4_init(void)
   ESP_LOGI(TAG, "V4 task scheduler initialized (10ms time slice)");
 
   return 0;
-}
-
-// ==============================================================================
-// V4-link Protocol (Future Implementation)
-// ==============================================================================
-
-/**
- * @brief Receive bytecode via V4-link protocol
- *
- * This is a placeholder for V4-link protocol implementation.
- * In the future, this will:
- * 1. Listen for V4-link frames on UART
- * 2. Parse frame headers and extract bytecode
- * 3. Load bytecode into VM dictionary
- * 4. Acknowledge successful reception
- *
- * @return 0 on success, negative on error or timeout
- */
-static int v4_link_receive(void)
-{
-  ESP_LOGI(TAG, "Waiting for bytecode (V4-link protocol)...");
-
-  // TODO: Implement V4-link protocol
-  // For now, just wait for UART input as a placeholder
-  uint8_t buffer[128];
-  int len = uart_read_bytes(UART_NUM_0, buffer, sizeof(buffer), pdMS_TO_TICKS(5000));
-
-  if (len > 0)
-  {
-    ESP_LOGI(TAG, "Received %d bytes (raw UART data)", len);
-    // TODO: Parse V4-link frames and load into VM
-    return 0;
-  }
-
-  return -1;  // Timeout
 }
 
 // ==============================================================================
@@ -154,15 +123,12 @@ static int v4_link_receive(void)
  * - Button (GPIO9) with pullup
  * - RGB LED (GPIO8) for future use
  */
-static void board_init_runtime(void)
-{
+static void board_init_runtime(void) {
   esp_err_t ret = board_peripherals_init();
-  if (ret != ESP_OK)
-  {
+  if (ret != ESP_OK) {
     ESP_LOGE(TAG, "Failed to initialize board peripherals: %d", ret);
     ESP_LOGE(TAG, "System halted.");
-    while (1)
-    {
+    while (1) {
       vTaskDelay(pdMS_TO_TICKS(1000));
     }
   }
@@ -186,21 +152,19 @@ static void board_init_runtime(void)
  * 1. HAL initialization (V4-hal)
  * 2. Board peripheral initialization
  * 3. V4 VM creation and task system initialization
- * 4. Main loop waiting for V4-link bytecode
+ * 4. V4-link protocol initialization
+ * 5. Main loop polling for V4-link bytecode
  */
-void app_main(void)
-{
+extern "C" void app_main(void) {
   ESP_LOGI(TAG, "=== V4 RTOS Runtime ===");
   ESP_LOGI(TAG, "Version: 1.0.0-dev");
 
   // Step 1: Initialize HAL
   int hal_status = hal_init();
-  if (hal_status != 0)
-  {
+  if (hal_status != 0) {
     ESP_LOGE(TAG, "HAL initialization failed: %d", hal_status);
     ESP_LOGE(TAG, "System halted.");
-    while (1)
-    {
+    while (1) {
       vTaskDelay(pdMS_TO_TICKS(1000));
     }
   }
@@ -210,12 +174,20 @@ void app_main(void)
   board_init_runtime();
 
   // Step 3: Initialize V4 VM and task system
-  if (v4_init() != 0)
-  {
+  if (v4_init() != 0) {
     ESP_LOGE(TAG, "V4 initialization failed");
     ESP_LOGE(TAG, "System halted.");
-    while (1)
-    {
+    while (1) {
+      vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+  }
+
+  // Step 4: Initialize V4-link protocol
+  g_link = new v4rtos::Esp32c6LinkPort(g_vm, 512);
+  if (g_link == nullptr) {
+    ESP_LOGE(TAG, "V4-link initialization failed");
+    ESP_LOGE(TAG, "System halted.");
+    while (1) {
       vTaskDelay(pdMS_TO_TICKS(1000));
     }
   }
@@ -232,13 +204,9 @@ void app_main(void)
   vTaskDelay(pdMS_TO_TICKS(100));
   board_led_off();
 
-  // Main loop: wait for V4-link bytecode
-  while (1)
-  {
-    if (v4_link_receive() == 0)
-    {
-      ESP_LOGI(TAG, "Bytecode received and loaded");
-      // TODO: Execute bytecode via VM
-    }
+  // Main loop: poll for V4-link bytecode
+  while (1) {
+    g_link->poll();
+    vTaskDelay(pdMS_TO_TICKS(1));  // 1ms polling interval
   }
 }
