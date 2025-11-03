@@ -7,6 +7,7 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  # Format check for all code
   format-check:
     runs-on: ubuntu-latest
     steps:
@@ -20,12 +21,17 @@ jobs:
 
     - name: Check formatting
       run: make format-check
+
+  # Detect changes to determine which jobs to run
   changes:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
     outputs:
       kernel: ${{ steps.filter.outputs.kernel }}
+      hal: ${{ steps.filter.outputs.hal }}
+      bsp: ${{ steps.filter.outputs.bsp }}
+      esp32c6: ${{ steps.filter.outputs.esp32c6 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -34,14 +40,27 @@ jobs:
           filters: |
             kernel:
               - 'kernel/**'
+              - 'CMakeLists.txt'
+              - 'Makefile'
+              - '.github/workflows/ci.yml'
+            hal:
+              - 'hal/**'
+              - 'CMakeLists.txt'
+              - '.github/workflows/ci.yml'
+            bsp:
+              - 'bsp/**'
+              - '.github/workflows/ci.yml'
+            esp32c6:
+              - 'bsp/esp32c6/**'
+              - 'hal/**'
               - '.github/workflows/ci.yml'
 
-  build-and-test:
+  # Build and test kernel (native)
+  build-kernel:
     needs: changes
-    if: needs.changes.outputs.kernel == 'true'
+    if: needs.changes.outputs.kernel == 'true' || needs.changes.outputs.hal == 'true'
     runs-on: ubuntu-latest
-
-    name: kernel
+    name: Build and test kernel
 
     steps:
     - uses: actions/checkout@v4
@@ -51,5 +70,54 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y cmake build-essential
 
-    - name: Build and test
-      run: BUILD_TYPE=Release V4_FETCH=ON make test
+    - name: Clone V4 dependency
+      run: |
+        git clone --depth 1 https://github.com/V4-project/V4.git ../V4 || echo "V4 already exists"
+
+    - name: Clone V4-hal dependency
+      run: |
+        git clone --depth 1 https://github.com/V4-project/V4-hal.git ../V4-hal || echo "V4-hal already exists"
+
+    - name: Build kernel
+      run: BUILD_TYPE=Release V4_FETCH=ON make build
+
+    - name: Run tests
+      run: BUILD_TYPE=Release make test
+
+  # Build ESP32-C6 runtime
+  build-esp32c6:
+    needs: changes
+    if: needs.changes.outputs.esp32c6 == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        board: [nanoc6]
+    name: Build ESP32-C6 runtime (${{ matrix.board }})
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Clone V4 dependency
+      run: git clone --depth 1 https://github.com/V4-project/V4.git ../V4
+
+    - name: Clone V4-hal dependency
+      run: git clone --depth 1 https://github.com/V4-project/V4-hal.git ../V4-hal
+
+    - name: Setup ESP-IDF
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: v5.3
+        target: esp32c6
+
+    - name: Build runtime
+      working-directory: bsp/esp32c6/runtime
+      run: |
+        . $IDF_PATH/export.sh
+        idf.py build
+
+    - name: Archive firmware
+      uses: actions/upload-artifact@v4
+      with:
+        name: esp32c6-${{ matrix.board }}-firmware
+        path: bsp/esp32c6/runtime/build/*.bin
+        retention-days: 7
