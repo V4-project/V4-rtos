@@ -1,15 +1,16 @@
-#include <stdlib.h>
-#include <string.h>
-
 #include "v4/internal/vm_internal.h"
 
-v4_err v4_task_spawn(v4_vm_t *vm, uint16_t word_idx, uint8_t priority, uint8_t ds_size,
-                     uint8_t rs_size)
-{
-  if (!vm)
-    return V4_ERR_INVALID_ARG;
+#include <stdlib.h>
+#include <string.h>
+#include <v4/errors.h>
 
-  v4_scheduler_t *sched = &vm->scheduler;
+v4_err v4_task_spawn(v4_rtos_vm_t *rtos_vm, uint16_t word_idx, uint8_t priority,
+                     uint8_t ds_size, uint8_t rs_size)
+{
+  if (!rtos_vm)
+    return V4_ERR_InvalidArg;
+
+  v4_scheduler_t *sched = &rtos_vm->scheduler;
 
   /* Find empty slot */
   int slot = -1;
@@ -23,7 +24,7 @@ v4_err v4_task_spawn(v4_vm_t *vm, uint16_t word_idx, uint8_t priority, uint8_t d
   }
 
   if (slot < 0)
-    return V4_ERR_TASK_LIMIT;
+    return V4_ERR_TaskLimit;
 
   v4_task_t *task = &sched->tasks[slot];
 
@@ -35,7 +36,7 @@ v4_err v4_task_spawn(v4_vm_t *vm, uint16_t word_idx, uint8_t priority, uint8_t d
   {
     free(task->ds_base);
     free(task->rs_base);
-    return V4_ERR_NO_MEMORY;
+    return V4_ERR_NoMemory;
   }
 
   /* Initialize task */
@@ -52,23 +53,23 @@ v4_err v4_task_spawn(v4_vm_t *vm, uint16_t word_idx, uint8_t priority, uint8_t d
 
   sched->task_count++;
 
-  return V4_OK;
+  return V4_ERR_OK;
 }
 
-v4_err v4_task_yield(v4_vm_t *vm)
+v4_err v4_task_yield(v4_rtos_vm_t *rtos_vm)
 {
-  if (!vm)
-    return V4_ERR_INVALID_ARG;
+  if (!rtos_vm)
+    return V4_ERR_InvalidArg;
 
-  return v4_schedule(vm);
+  return v4_schedule(rtos_vm);
 }
 
-v4_err v4_task_sleep(v4_vm_t *vm, v4_u32 ms)
+v4_err v4_task_sleep(v4_rtos_vm_t *rtos_vm, v4_u32 ms)
 {
-  if (!vm)
-    return V4_ERR_INVALID_ARG;
+  if (!rtos_vm)
+    return V4_ERR_InvalidArg;
 
-  v4_scheduler_t *sched = &vm->scheduler;
+  v4_scheduler_t *sched = &rtos_vm->scheduler;
   v4_task_t *task = &sched->tasks[sched->current_task];
 
   v4_u32 current_tick = v4_platform_get_tick_ms();
@@ -76,15 +77,15 @@ v4_err v4_task_sleep(v4_vm_t *vm, v4_u32 ms)
   task->state = V4_TASK_STATE_BLOCKED;
 
   /* Trigger reschedule */
-  return v4_schedule(vm);
+  return v4_schedule(rtos_vm);
 }
 
-v4_err v4_task_exit(v4_vm_t *vm)
+v4_err v4_task_exit(v4_rtos_vm_t *rtos_vm)
 {
-  if (!vm)
-    return V4_ERR_INVALID_ARG;
+  if (!rtos_vm)
+    return V4_ERR_InvalidArg;
 
-  v4_scheduler_t *sched = &vm->scheduler;
+  v4_scheduler_t *sched = &rtos_vm->scheduler;
   v4_task_t *task = &sched->tasks[sched->current_task];
 
   /* Free task stacks */
@@ -103,21 +104,21 @@ v4_err v4_task_exit(v4_vm_t *vm)
   sched->task_count--;
 
   /* Trigger reschedule */
-  return v4_schedule(vm);
+  return v4_schedule(rtos_vm);
 }
 
-uint8_t v4_task_self(v4_vm_t *vm)
+uint8_t v4_task_self(v4_rtos_vm_t *rtos_vm)
 {
-  if (!vm)
+  if (!rtos_vm)
     return 0;
 
-  return vm->scheduler.current_task;
+  return rtos_vm->scheduler.current_task;
 }
 
-uint8_t v4_task_count(v4_vm_t *vm)
+uint8_t v4_task_count(v4_rtos_vm_t *rtos_vm)
 {
-  if (!vm)
+  if (!rtos_vm)
     return 0;
 
-  return vm->scheduler.task_count;
+  return rtos_vm->scheduler.task_count;
 }

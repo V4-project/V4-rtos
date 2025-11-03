@@ -1,6 +1,7 @@
-#include <string.h>
-
 #include "v4/internal/vm_internal.h"
+
+#include <string.h>
+#include <v4/errors.h>
 
 void v4_msg_queue_init(v4_msg_queue_t *q)
 {
@@ -13,19 +14,19 @@ void v4_msg_queue_init(v4_msg_queue_t *q)
   q->count = 0;
 }
 
-v4_err v4_msg_send(v4_vm_t *vm, uint8_t dst_task, uint8_t msg_type, v4_i32 data)
+v4_err v4_msg_send(v4_rtos_vm_t *rtos_vm, uint8_t dst_task, uint8_t msg_type, v4_i32 data)
 {
-  if (!vm)
-    return V4_ERR_INVALID_ARG;
+  if (!rtos_vm)
+    return V4_ERR_InvalidArg;
 
-  v4_msg_queue_t *q = &vm->msg_queue;
+  v4_msg_queue_t *q = &rtos_vm->msg_queue;
 
   /* Queue full? */
   if (q->count >= V4_MSG_QUEUE_SIZE)
-    return V4_ERR_MSG_QUEUE_FULL;
+    return V4_ERR_MsgQueueFull;
 
   /* Get source task ID */
-  uint8_t src_task = vm->scheduler.current_task;
+  uint8_t src_task = rtos_vm->scheduler.current_task;
 
   /* Add message to queue */
   v4_message_t *msg = &q->queue[q->write_idx];
@@ -38,17 +39,17 @@ v4_err v4_msg_send(v4_vm_t *vm, uint8_t dst_task, uint8_t msg_type, v4_i32 data)
   q->write_idx = (q->write_idx + 1) % V4_MSG_QUEUE_SIZE;
   q->count++;
 
-  return V4_OK;
+  return V4_ERR_OK;
 }
 
-v4_err v4_msg_receive(v4_vm_t *vm, uint8_t msg_type, v4_i32 *data, uint8_t *src_task,
-                      int blocking, v4_u32 timeout_ms)
+v4_err v4_msg_receive(v4_rtos_vm_t *rtos_vm, uint8_t msg_type, v4_i32 *data,
+                      uint8_t *src_task, int blocking, v4_u32 timeout_ms)
 {
-  if (!vm)
-    return V4_ERR_INVALID_ARG;
+  if (!rtos_vm)
+    return V4_ERR_InvalidArg;
 
-  v4_msg_queue_t *q = &vm->msg_queue;
-  uint8_t current_task = vm->scheduler.current_task;
+  v4_msg_queue_t *q = &rtos_vm->msg_queue;
+  uint8_t current_task = rtos_vm->scheduler.current_task;
 
   v4_u32 start_time = 0;
   if (blocking)
@@ -87,14 +88,14 @@ v4_err v4_msg_receive(v4_vm_t *vm, uint8_t msg_type, v4_i32 *data, uint8_t *src_
         }
         q->count--;
 
-        return V4_OK;
+        return V4_ERR_OK;
       }
     }
 
     /* No matching message found */
     if (!blocking)
     {
-      return V4_ERR_NO_MESSAGE;
+      return V4_ERR_NoMessage;
     }
 
     /* Check timeout */
@@ -103,11 +104,11 @@ v4_err v4_msg_receive(v4_vm_t *vm, uint8_t msg_type, v4_i32 *data, uint8_t *src_
       v4_u32 current_time = v4_platform_get_tick_ms();
       if (current_time - start_time >= timeout_ms)
       {
-        return V4_ERR_NO_MESSAGE;
+        return V4_ERR_NoMessage;
       }
     }
 
     /* Yield to other tasks and try again */
-    v4_task_yield(vm);
+    v4_task_yield(rtos_vm);
   }
 }
