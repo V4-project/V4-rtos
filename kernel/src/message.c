@@ -1,7 +1,7 @@
-#include "v4/internal/vm_internal.h"
-
 #include <string.h>
 #include <v4/errors.h>
+
+#include "v4/internal/vm_internal.h"
 
 void v4_msg_queue_init(v4_msg_queue_t *q)
 {

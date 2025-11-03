@@ -1,6 +1,6 @@
-#include "v4/internal/vm_internal.h"
-
 #include <stdlib.h>
+
+#include "v4/internal/vm_internal.h"
 
 /**
  * @file vm_wrapper.c

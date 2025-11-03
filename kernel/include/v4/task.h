@@ -7,14 +7,14 @@ extern "C"
 {
 #endif
 
-  /**
-   * @file task.h
-   * @brief V4 RTOS Task Management API
-   */
+/**
+ * @file task.h
+ * @brief V4 RTOS Task Management API
+ */
 
-  /* Task configuration */
-  #define V4_MAX_TASKS 8
-  #define V4_MSG_QUEUE_SIZE 16
+/* Task configuration */
+#define V4_MAX_TASKS 8
+#define V4_MSG_QUEUE_SIZE 16
 
   /* Task states */
   typedef enum

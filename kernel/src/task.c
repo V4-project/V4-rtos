@@ -1,8 +1,8 @@
-#include "v4/internal/vm_internal.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <v4/errors.h>
+
+#include "v4/internal/vm_internal.h"
 
 v4_err v4_task_spawn(v4_rtos_vm_t *rtos_vm, uint16_t word_idx, uint8_t priority,
                      uint8_t ds_size, uint8_t rs_size)

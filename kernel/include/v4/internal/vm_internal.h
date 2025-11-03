@@ -24,9 +24,9 @@ extern "C"
    */
   typedef struct v4_rtos_vm
   {
-    struct Vm *vm;              /* V4 VM instance */
-    v4_scheduler_t scheduler;   /* Task scheduler */
-    v4_msg_queue_t msg_queue;   /* Message queue */
+    struct Vm *vm;            /* V4 VM instance */
+    v4_scheduler_t scheduler; /* Task scheduler */
+    v4_msg_queue_t msg_queue; /* Message queue */
   } v4_rtos_vm_t;
 
   /* RTOS VM lifecycle */

@@ -7,6 +7,19 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format
+        pip install cmake-format
+
+    - name: Check formatting
+      run: make format-check
   changes:
     runs-on: ubuntu-latest
     permissions:
