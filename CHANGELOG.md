@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-11-04
+
 ### Added
 - Comprehensive kernel unit tests using doctest (copied from V4)
   - VM wrapper tests (create, destroy, initialization)
