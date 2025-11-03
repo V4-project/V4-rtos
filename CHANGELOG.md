@@ -8,28 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial kernel implementation with V4 VM core and preemptive multitasking
-  - VM core: lifecycle management, word registration, stack operations
-  - VM executor: bytecode execution with basic opcodes (stack, arithmetic, comparison, control flow)
-  - Preemptive scheduler: priority-based with round-robin for equal priorities
-  - Task management: spawn, sleep, exit, yield operations
-  - Message queue: 16-message inter-task communication queue
-  - Platform stubs for host testing (Linux/macOS)
-- Code formatting configuration (.clang-format, .cmake-format.yaml, .editorconfig)
-- Comprehensive Makefile with format, build, test, and sanitizer targets
-- ESP32-C6 BSP structure with M5Stack NanoC6 board support
-- Runtime-based deployment model (flash once, send bytecode)
-- Documentation: README, architecture guide, getting started, API reference
+- Comprehensive kernel unit tests using doctest (copied from V4)
+  - VM wrapper tests (create, destroy, initialization)
+  - Task spawn tests (single, multiple, max tasks, error handling)
+  - Task lifecycle tests (get_info, self, critical sections)
+  - Message passing tests (send/receive, queue full, broadcast)
 
 ### Changed
-- Compiler and shell marked as optional components (kernel+hal are core)
-- Restructured BSP for runtime-based deployment instead of example-based
+- **BREAKING**: Converted kernel to C++ (was C) to leverage V4's C++ implementation
+- **BREAKING**: Removed duplicate scheduler/task/message implementations (~900 lines)
+- Kernel now uses V4's built-in scheduler, task manager, and message queue directly
+- Thin C++ wrapper (vm_wrapper.cpp) replaces standalone kernel implementation
+- CMake configuration simplified to use V4 VM library with FetchContent support
+- CI workflows consolidated from 4 separate workflows to 1 unified workflow
+
+### Removed
+- kernel/src/scheduler.c (167 lines) - now uses V4's scheduler.cpp
+- kernel/src/task.c (125 lines) - now uses V4's task.cpp
+- kernel/src/message.c (115 lines) - now uses V4's message.cpp
+- kernel/include/v4/task.h - duplicate type definitions removed
 
 ### Technical Details
-- 8 concurrent tasks with independent stacks (256 DS, 64 RS per task)
-- Context switch: <100μs target
-- Memory footprint: ~48KB minimum (kernel+hal), ~140KB full config
-- Dependencies: V4 opcodes and sys_ids via CMake FetchContent
+- V4-RTOS is now a thin wrapper around V4 VM with 10ms time slice initialization
+- Direct access to V4 internals (Vm struct) for comprehensive testing
+- Uses V4 v0.10.0 with C-compatible errors.h and RTOS error codes
+- All tests pass with doctest framework (DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS)
 
 ## [0.0.0] - 2025-01-03
 

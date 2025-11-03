@@ -117,8 +117,9 @@ target_compile_options(v4_kernel PRIVATE -Wall -Wextra -Werror $<$<CONFIG:Debug>
 if(V4_BUILD_TESTS AND _V4_HAS_VM)
   enable_testing()
 
-  # VM wrapper tests
+  # VM wrapper tests (using doctest)
   add_executable(test_vm_wrapper tests/test_vm_wrapper.cpp)
+  target_include_directories(test_vm_wrapper PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
   target_link_libraries(test_vm_wrapper PRIVATE v4_kernel v4vm mock_hal)
   add_test(NAME test_vm_wrapper COMMAND test_vm_wrapper)
 endif()
