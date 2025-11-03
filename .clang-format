@@ -1,0 +1,23 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ColumnLimit: 90
+PointerAlignment: Left
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Allman
+IndentCaseLabels: true
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+BreakBeforeBinaryOperators: None
+AlignAfterOpenBracket: Align
+BinPackArguments: true
+BinPackParameters: true
+ConstructorInitializerIndentWidth: 4
