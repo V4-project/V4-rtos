@@ -1,0 +1,39 @@
+name: CI - Compiler
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'compiler/**'
+      - 'kernel/**'
+      - '.github/workflows/ci-compiler.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'compiler/**'
+      - 'kernel/**'
+      - '.github/workflows/ci-compiler.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DV4_BUILD_KERNEL=ON -DV4_BUILD_COMPILER=ON -DV4_BUILD_TESTS=ON
+
+    - name: Build
+      run: cmake --build build -j
+
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure
