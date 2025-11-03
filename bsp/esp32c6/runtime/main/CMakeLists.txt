@@ -67,7 +67,7 @@ idf_component_register(
   ${V4HAL_SRCS}
   INCLUDE_DIRS
   "."
-  "../boards"
+  "../../boards"
   "${V4_DIR}/include"
   "${V4HAL_DIR}/include"
   "${V4HAL_DIR}/ports/esp32"
