@@ -1,11 +1,38 @@
 # Changelog
 
-All notable changes to V4 RTOS will be documented in this file.
+All notable changes to V4 Runtime will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.2.0] - 2025-11-05
+
+### Changed
+- **BREAKING**: Renamed project from V4-rtos to V4-runtime
+- **BREAKING**: Changed project description from "Real-Time Operating System" to "Runtime Environment"
+- Clarified that V4 Runtime uses FreeRTOS as backend scheduler (not a standalone RTOS)
+- Updated all documentation to reflect FreeRTOS-based architecture
+- Comparison table now compares with Forth environments (Mecrisp, Zeptoforth, FlashForth) instead of RTOSes
+- Updated architecture documentation to show actual bsp/esp32c6/runtime structure
+
+### Removed
+- **BREAKING**: Removed kernel/ directory (V4 VM used directly, no wrapper needed)
+- **BREAKING**: Removed compiler/ directory (empty, no implementation)
+- **BREAKING**: Removed shell/ directory (empty, no implementation)
+- **BREAKING**: Removed protocol/ directory (empty, actual V4-link implementation in bsp/esp32c6/runtime)
+- **BREAKING**: Removed examples/ directory (empty, actual examples in tools/examples)
+- Simplified CMakeLists.txt by removing build options for removed components
+
+### Fixed
+- Updated all GitHub repository URLs from V4-project/V4-rtos to V4-project/V4-runtime
+- Updated CHANGELOGs in all subdirectories with new repository URLs
+
+### Technical Details
+- Deleted ~9,070 lines of unused/duplicate code
+- Project structure now accurately reflects implementation reality
+- Actual runtime lives in bsp/esp32c6/runtime/ using V4 VM + FreeRTOS directly
 
 ## [0.1.0] - 2025-11-04
 
