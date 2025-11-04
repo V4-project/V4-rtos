@@ -37,5 +37,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Memory and clock configuration constants
 - Battery voltage reading API declarations
 
-[Unreleased]: https://github.com/V4-project/V4-rtos/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/V4-project/V4-rtos/releases/tag/v0.1.0
+[Unreleased]: https://github.com/V4-project/V4-runtime/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/V4-project/V4-runtime/releases/tag/v0.1.0

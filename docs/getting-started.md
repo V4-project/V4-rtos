@@ -1,6 +1,6 @@
-# Getting Started with V4 RTOS
+# Getting Started with V4 Runtime
 
-This guide will help you get V4 RTOS running on an ESP32-C6 board in about 10 minutes.
+This guide will help you get V4 Runtime running on an ESP32-C6 board in about 10 minutes.
 
 ## Prerequisites
 
@@ -35,12 +35,12 @@ git checkout v5.1.2
 . $HOME/esp/esp-idf/export.sh
 ```
 
-## Step 2: Clone V4 RTOS
+## Step 2: Clone V4 Runtime
 
 ```bash
 # Clone the repository
-git clone https://github.com/V4-project/V4-rtos.git
-cd V4-rtos
+git clone https://github.com/V4-project/V4-runtime.git
+cd V4-runtime
 ```
 
 ## Step 3: Build and Flash Hello RTOS Example
@@ -65,7 +65,7 @@ idf.py monitor
 Expected output:
 
 ```
-V4 RTOS v1.0.0
+V4 Runtime v1.0.0
 Starting scheduler...
 [Task 1] Hello from task 1!
 [Task 2] Hello from task 2!
@@ -107,12 +107,12 @@ idf.py build flash monitor
 
 ## Next Steps
 
-Now that you have V4 RTOS running:
+Now that you have V4 Runtime running:
 
 1. **Explore Examples** - Check other examples in `bsp/esp32c6/examples/`
 2. **Read Architecture** - Understanding the [Architecture](architecture.md)
 3. **API Reference** - Learn the [Kernel API](api-reference/kernel.md)
-4. **Build Your Own** - Create your own V4 RTOS application
+4. **Build Your Own** - Create your own V4 Runtime application
 
 ## Troubleshooting
 
@@ -141,10 +141,10 @@ Make sure ESP-IDF is sourced:
 
 - [ESP-IDF Documentation](https://docs.espressif.com/projects/esp-idf/en/latest/)
 - [M5Stack NanoC6 Guide](https://docs.m5stack.com/en/core/M5NanoC6)
-- [V4 RTOS Architecture](architecture.md)
+- [V4 Runtime Architecture](architecture.md)
 - [API Reference](api-reference/)
 
 ## Getting Help
 
-- [GitHub Issues](https://github.com/V4-project/V4-rtos/issues)
-- [Discussions](https://github.com/V4-project/V4-rtos/discussions)
+- [GitHub Issues](https://github.com/V4-project/V4-runtime/issues)
+- [Discussions](https://github.com/V4-project/V4-runtime/discussions)

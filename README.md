@@ -1,34 +1,35 @@
-# V4 RTOS
+# V4 Runtime
 
-**Embedded Forth Real-Time Operating System**
+**Embedded Forth Runtime Environment**
 
-[![CI](https://github.com/V4-project/V4-rtos/workflows/CI/badge.svg)](https://github.com/V4-project/V4-rtos/actions)
+[![CI](https://github.com/V4-project/V4-runtime/workflows/CI/badge.svg)](https://github.com/V4-project/V4-runtime/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-V4 RTOS is a lightweight, preemptive real-time operating system for resource-constrained microcontrollers, featuring interactive Forth development.
+V4 Runtime is a lightweight Forth runtime environment built on FreeRTOS for resource-constrained microcontrollers, featuring interactive Forth development and multitasking capabilities.
 
 ## Features
 
 ### Core (Required)
 
-- **Preemptive Multitasking** - 8 tasks, <100μs context switch
+- **FreeRTOS Backend** - Leverages proven FreeRTOS scheduler for multitasking
+- **V4 VM Integration** - Forth bytecode execution with task support
 - **Message Passing** - Inter-task communication with 16-message queue
 - **Hardware Abstraction** - Unified HAL across platforms
 
 ### Optional Components
 
-- **Forth Compiler** - Compile Forth source to V4 bytecode
-- **Interactive REPL** - Live Forth programming on device
-- **Protocol Stack** - V4-link for OTA updates
+- **Interactive REPL** - Live Forth programming on device (via V4 VM)
+- **V4-link Protocol** - Bytecode transfer over USB Serial/JTAG
+- **OTA Updates** - Remote bytecode deployment (planned)
 - **JIT Compilation** - Runtime optimization (planned)
 
 ## Quick Start (10 minutes)
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/V4-project/V4-rtos.git
-cd V4-rtos
+git clone https://github.com/V4-project/V4-runtime.git
+cd V4-runtime
 
 # 2. Flash V4 runtime to ESP32-C6
 cd bsp/esp32c6/runtime
@@ -44,18 +45,21 @@ See [Getting Started Guide](docs/getting-started.md) for detailed instructions.
 ## Architecture
 
 ```
-V4 RTOS
-├── kernel/      VM core + scheduler (42KB) [required]
-├── hal/         Hardware abstraction (5.7KB) [required]
-├── compiler/    Forth → bytecode [optional]
-├── shell/       Interactive REPL (91KB) [optional]
-├── protocol/    V4-link protocol (1.5KB) [optional]
-├── bsp/         Board support packages
-└── tools/       Development CLI
+V4 Runtime
+├── bsp/         Board support packages (ESP32-C6 runtime)
+│   └── esp32c6/
+│       ├── runtime/     Main V4 runtime application
+│       ├── boards/      Board-specific configurations (NanoC6, DevKit)
+│       ├── hal_integration/  V4-hal integration layer
+│       └── linker/      Linker scripts
+├── hal/         V4-hal CMake integration
+├── tools/       Development tools and Forth examples
+├── scripts/     Build and flash helper scripts
+└── docs/        Documentation
 ```
 
-**Minimum Configuration**: kernel + hal (~48KB)
-**Full Configuration**: All components (~140KB)
+**Runtime Size**: ~64KB (V4 VM + FreeRTOS + HAL + V4-link)
+**RAM Usage**: ~16KB base + per-task stacks
 
 ## Supported Platforms
 
@@ -66,24 +70,25 @@ V4 RTOS
 | CH32V203 | Planned | CH32V203 | RISC-V 32 | 20KB | 64KB |
 | RP2350 | Planned | RP2350 | ARM + RISC-V | 520KB | 4MB |
 
-## Comparison with Other RTOSes
+## Comparison with Other Forth Environments
 
-| Feature | V4 RTOS | FreeRTOS | Zephyr | Mecrisp |
-|---------|---------|----------|--------|---------|
-| **Scheduler** | Preemptive | Preemptive | Preemptive | Cooperative |
-| **Language** | Forth | C | C | Forth |
+| Feature | V4 Runtime | Mecrisp | Zeptoforth | FlashForth |
+|---------|------------|---------|------------|------------|
+| **Backend** | FreeRTOS | Bare metal | FreeRTOS | Bare metal |
+| **Scheduler** | Preemptive | Cooperative | Preemptive | Cooperative |
 | **VM** | Yes | No | No | No |
-| **REPL** | Yes | No | No | Yes |
-| **Flash** | 64KB~ | 10KB~ | 256KB~ | 16KB~ |
-| **Context Switch** | <100μs | 1-5μs | 2-10μs | N/A |
-| **OTA** | Planned | Manual | Yes | Manual |
+| **REPL** | Yes | Yes | Yes | Yes |
+| **Flash** | 64KB~ | 16KB~ | 32KB~ | 8KB~ |
+| **Multitasking** | FreeRTOS tasks | None | FreeRTOS tasks | Cooperative |
+| **OTA** | Planned | Manual | Manual | Manual |
 | **JIT** | Planned | No | No | No |
 
-**V4 RTOS Advantages:**
-- Only Forth RTOS with preemptive multitasking
+**V4 Runtime Advantages:**
+- Leverages proven FreeRTOS for robust multitasking
 - Interactive development without reflashing
 - Designed for hot-swapping and live updates
-- Unified VM/REPL/RTOS integration
+- Unified VM/REPL/runtime integration
+- Bytecode-based for portability and dynamic loading
 
 ## Documentation
 
@@ -114,18 +119,12 @@ See [Building Guide](docs/building.md) for detailed instructions.
 
 ## Components
 
-### Core Components (Required)
-
-- **[kernel/](kernel/)** - VM core + preemptive scheduler
-- **[hal/](hal/)** - C++17 CRTP hardware abstraction
-- **[bsp/](bsp/)** - Board support packages
-
-### Optional Components
-
-- **[compiler/](compiler/)** - Forth-to-bytecode compiler
-- **[shell/](shell/)** - Interactive REPL
-- **[protocol/](protocol/)** - V4-link bytecode transfer
-- **[tools/](tools/)** - CLI development tools
+- **[bsp/esp32c6/runtime/](bsp/esp32c6/runtime/)** - Main runtime application (V4 VM + FreeRTOS)
+- **[bsp/esp32c6/boards/](bsp/esp32c6/boards/)** - Board configurations (NanoC6, DevKit)
+- **[hal/](hal/)** - V4-hal CMake integration
+- **[tools/examples/](tools/examples/)** - Forth example programs
+- **[docs/](docs/)** - Documentation and API reference
+- **[scripts/](scripts/)** - Build and flash helper scripts
 
 ## Contributing
 
@@ -142,5 +141,5 @@ Choose either license for your use.
 ## Links
 
 - [Documentation](docs/)
-- [Issue Tracker](https://github.com/V4-project/V4-rtos/issues)
-- [Discussions](https://github.com/V4-project/V4-rtos/discussions)
+- [Issue Tracker](https://github.com/V4-project/V4-runtime/issues)
+- [Discussions](https://github.com/V4-project/V4-runtime/discussions)
