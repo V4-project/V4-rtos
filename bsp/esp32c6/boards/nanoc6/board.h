@@ -30,13 +30,16 @@ extern "C"
  * GPIO Pin Definitions
  * ======================================================================== */
 
-/** Built-in LED (GPIO7) */
+/** Simple Blue LED (GPIO7, active high) */
 #define LED_PIN GPIO_NUM_7
 #define LED_ACTIVE_HIGH 1
 
-/** RGB LED / NeoPixel (GPIO8, WS2812) */
-#define RGB_LED_PIN GPIO_NUM_8
+/** Built-in RGB LED / NeoPixel (GPIO20, WS2812) */
+#define RGB_LED_PIN GPIO_NUM_20
 #define RGB_LED_COUNT 1
+
+/** RGB LED Power Enable (GPIO19, must be HIGH to enable LED) */
+#define RGB_LED_ENABLE_PIN GPIO_NUM_19
 
 /** Button (GPIO9, active low with internal pullup) */
 #define BUTTON_PIN GPIO_NUM_9
@@ -105,33 +108,18 @@ extern "C"
 #define BATTERY_VOLTAGE_DIVIDER 2.0f
 
   /* ========================================================================
-   * Board Initialization
+   * Board Initialization and Utilities
    * ======================================================================== */
 
   /**
-   * @brief Initialize board-specific peripherals
+   * @brief Board-specific peripheral initialization and utilities
    *
-   * Call this function early in main() to set up:
-   * - LED pin
-   * - Button pin with pullup
-   * - I2C bus
-   * - Battery monitoring
+   * See peripherals.h for implementation of:
+   * - board_peripherals_init(): Initialize LED, Button, RGB LED
+   * - board_led_init/on/off/toggle()
+   * - board_button_init/is_pressed()
+   * - board_rgb_led_init/set/clear()
    */
-  void board_init(void);
-
-  /**
-   * @brief Read battery voltage
-   *
-   * @return Battery voltage in millivolts, or 0 if not available
-   */
-  uint32_t board_get_battery_voltage_mv(void);
-
-  /**
-   * @brief Check if button is pressed
-   *
-   * @return true if button is pressed, false otherwise
-   */
-  bool board_button_is_pressed(void);
 
 #ifdef __cplusplus
 }

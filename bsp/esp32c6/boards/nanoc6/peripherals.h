@@ -144,6 +144,25 @@ extern "C"
    */
   static inline esp_err_t board_rgb_led_init(void)
   {
+    esp_err_t ret;
+
+    // Configure RGB LED power enable pin (GPIO19)
+    gpio_config_t enable_conf = {
+        .pin_bit_mask = (1ULL << RGB_LED_ENABLE_PIN),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    ret = gpio_config(&enable_conf);
+    if (ret != ESP_OK) {
+      return ret;
+    }
+
+    // Enable LED power supply (set GPIO19 HIGH)
+    gpio_set_level(RGB_LED_ENABLE_PIN, 1);
+
+    // Configure RGB LED data pin (GPIO20)
     gpio_config_t rgb_conf = {
         .pin_bit_mask = (1ULL << RGB_LED_PIN),
         .mode = GPIO_MODE_OUTPUT,
@@ -151,7 +170,15 @@ extern "C"
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
-    return gpio_config(&rgb_conf);
+    ret = gpio_config(&rgb_conf);
+    if (ret != ESP_OK) {
+      return ret;
+    }
+
+    // Set initial LOW state
+    gpio_set_level(RGB_LED_PIN, 0);
+
+    return ESP_OK;
   }
 
   /**
