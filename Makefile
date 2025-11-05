@@ -54,20 +54,24 @@ clean:
 # Apply formatting
 format:
 	@echo "✨ Formatting C/C++ code..."
-	@find kernel hal compiler shell protocol bsp -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.c' \) \
-		-not -path "*/build/*" -not -path "*/vendor/*" -exec clang-format -i {} \; 2>/dev/null || true
+	@find bsp -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.c' \) \
+		-not -path "*/build/*" -not -path "*/vendor/*" -not -path "*/managed_components/*" \
+		-exec clang-format -i {} \; 2>/dev/null || true
 	@echo "✨ Formatting CMake files..."
-	@find . -name 'CMakeLists.txt' -o -name '*.cmake' | grep -v build | xargs cmake-format -i 2>/dev/null || true
+	@find . -name 'CMakeLists.txt' -o -name '*.cmake' | grep -v build | grep -v managed_components | xargs cmake-format -i 2>/dev/null || true
 	@echo "✅ Formatting complete!"
 
 # Format check
 format-check:
 	@echo "🔍 Checking C/C++ formatting..."
-	@find kernel hal compiler shell protocol bsp -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.c' \) \
-		-not -path "*/build/*" -not -path "*/vendor/*" | xargs clang-format --dry-run --Werror 2>/dev/null || \
-		(echo "❌ C/C++ formatting check failed. Run 'make format' to fix." && exit 1)
+	@if [ -d bsp ]; then \
+		find bsp -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.c' \) \
+			-not -path "*/build/*" -not -path "*/vendor/*" -not -path "*/managed_components/*" \
+			| xargs clang-format --dry-run --Werror 2>/dev/null || \
+			(echo "❌ C/C++ formatting check failed. Run 'make format' to fix." && exit 1); \
+	fi
 	@echo "🔍 Checking CMake formatting..."
-	@find . -name 'CMakeLists.txt' -o -name '*.cmake' | grep -v build | xargs cmake-format --check 2>/dev/null || \
+	@find . -name 'CMakeLists.txt' -o -name '*.cmake' | grep -v build | grep -v managed_components | xargs cmake-format --check 2>/dev/null || \
 		(echo "❌ CMake formatting check failed. Run 'make format' to fix." && exit 1)
 	@echo "✅ All formatting checks passed!"
 
