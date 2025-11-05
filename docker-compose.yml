@@ -8,8 +8,8 @@ services:
     volumes:
       # Mount project directory
       - .:/project
-      # Mount V4 (required for VM core)
-      - ../V4:/v4:ro
+      # Mount V4-engine (required for VM core)
+      - ../V4-engine:/v4-engine:ro
       # Mount V4-hal (required for HAL implementation)
       - ../V4-hal:/v4-hal:ro
       # Mount V4-link (required for bytecode protocol)
@@ -20,7 +20,7 @@ services:
       - esp-idf-cache:/root/.espressif
     environment:
       # Set V4 paths for build system
-      - V4_PATH=/v4
+      - V4_ENGINE_PATH=/v4-engine
       - V4_HAL_PATH=/v4-hal
       - V4_LINK_PATH=/v4-link
     working_dir: /project/bsp/esp32c6/runtime

@@ -138,8 +138,13 @@ idf_component_register(
 target_compile_features(${COMPONENT_LIB} PUBLIC cxx_std_17)
 
 # Compiler flags for V4 and V4-hal
-target_compile_options(${COMPONENT_LIB} PRIVATE -fno-exceptions -fno-rtti -Wall -Wextra
-                                                $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
+target_compile_options(
+  ${COMPONENT_LIB}
+  PRIVATE -fno-exceptions
+          -fno-rtti
+          -Wall
+          -Wextra
+          $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
 
 # Platform defines
 target_compile_definitions(${COMPONENT_LIB} PRIVATE HAL_PLATFORM_ESP32 V4_EMBEDDED)
