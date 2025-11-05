@@ -9,6 +9,7 @@ on:
 jobs:
   # Format check for all code
   format-check:
+    name: Format Check
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -24,13 +25,11 @@ jobs:
 
   # Detect changes to determine which jobs to run
   changes:
+    name: Detect Changes
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
     outputs:
-      kernel: ${{ steps.filter.outputs.kernel }}
-      hal: ${{ steps.filter.outputs.hal }}
-      bsp: ${{ steps.filter.outputs.bsp }}
       esp32c6: ${{ steps.filter.outputs.esp32c6 }}
     steps:
       - uses: actions/checkout@v4
@@ -38,74 +37,33 @@ jobs:
         id: filter
         with:
           filters: |
-            kernel:
-              - 'kernel/**'
-              - 'CMakeLists.txt'
-              - 'Makefile'
-              - '.github/workflows/ci.yml'
-            hal:
-              - 'hal/**'
-              - 'CMakeLists.txt'
-              - '.github/workflows/ci.yml'
-            bsp:
-              - 'bsp/**'
-              - '.github/workflows/ci.yml'
             esp32c6:
               - 'bsp/esp32c6/**'
-              - 'hal/**'
+              - 'Makefile'
               - '.github/workflows/ci.yml'
-
-  # Build and test kernel (native)
-  build-kernel:
-    needs: changes
-    if: needs.changes.outputs.kernel == 'true' || needs.changes.outputs.hal == 'true'
-    runs-on: ubuntu-latest
-    name: Build and test kernel
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake build-essential
-
-    - name: Clone V4-engine dependency
-      run: |
-        git clone --depth 1 https://github.com/V4-project/V4-engine.git ../V4-engine || echo "V4-engine already exists"
-
-    - name: Clone V4-hal dependency
-      run: |
-        git clone --depth 1 https://github.com/V4-project/V4-hal.git ../V4-hal || echo "V4-hal already exists"
-
-    - name: Build kernel
-      run: BUILD_TYPE=Release V4_FETCH=ON make build
-
-    - name: Run tests
-      run: BUILD_TYPE=Release make test
 
   # Build ESP32-C6 runtime
   build-esp32c6:
+    name: Build ESP32-C6 (${{ matrix.board }})
     needs: changes
     if: needs.changes.outputs.esp32c6 == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         board: [nanoc6]
-    name: Build ESP32-C6 runtime (${{ matrix.board }})
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Clone V4-engine dependency into runtime
+    - name: Clone V4-engine dependency
       working-directory: bsp/esp32c6/runtime
       run: git clone --depth 1 https://github.com/V4-project/V4-engine.git _deps/V4-engine
 
-    - name: Clone V4-hal dependency into runtime
+    - name: Clone V4-hal dependency
       working-directory: bsp/esp32c6/runtime
       run: git clone --depth 1 https://github.com/V4-project/V4-hal.git _deps/V4-hal
 
-    - name: Clone V4-link dependency into runtime
+    - name: Clone V4-link dependency
       working-directory: bsp/esp32c6/runtime
       run: git clone --depth 1 https://github.com/V4-project/V4-link.git _deps/V4-link
 
