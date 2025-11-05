@@ -10,14 +10,15 @@
 #include <cstdio>
 #include <cstring>
 
-// Board definitions
-extern "C"
-{
-#include "nanoc6/board.h"
-}
+// Board definitions (LED control)
+#include "driver/gpio.h"
+
+// NanoC6 LED pin
+#define LED_PIN GPIO_NUM_15
 
 // V4 VM API
 #include "v4/vm_api.h"
+#include "v4/panic.h"  // For PanicInfo struct and vm_set_panic_handler
 
 // ESP-IDF APIs
 #include "esp_log.h"
@@ -25,6 +26,19 @@ extern "C"
 #include "freertos/task.h"
 
 static const char* TAG = "v4-panic";
+
+/**
+ * @brief LED control functions for panic indication
+ */
+static void board_led_on()
+{
+  gpio_set_level(LED_PIN, 1);
+}
+
+static void board_led_off()
+{
+  gpio_set_level(LED_PIN, 0);
+}
 
 /**
  * @brief Get human-readable string for VM error code
@@ -145,6 +159,16 @@ extern "C" void panic_handler_init(struct Vm* vm)
     ESP_LOGE(TAG, "Cannot initialize panic handler: NULL VM");
     return;
   }
+
+  // Initialize LED pin for panic indication
+  gpio_config_t io_conf = {};
+  io_conf.pin_bit_mask = (1ULL << LED_PIN);
+  io_conf.mode = GPIO_MODE_OUTPUT;
+  io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+  io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+  io_conf.intr_type = GPIO_INTR_DISABLE;
+  gpio_config(&io_conf);
+  gpio_set_level(LED_PIN, 0);  // LED off initially
 
   vm_set_panic_handler(vm, handle_panic, nullptr);
   ESP_LOGI(TAG, "Panic handler registered");
