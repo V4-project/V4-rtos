@@ -37,6 +37,12 @@ extern "C"
 // V4 panic handler
 #include "panic_handler.hpp"
 
+// V4-std integration
+#include "esp32_led_hal.hpp"
+#include "esp32c6_ddt_provider.hpp"
+#include "v4std/ddt.hpp"
+#include "v4std/sys_led.hpp"
+
 // ESP-IDF APIs
 #include "driver/gpio.h"
 #include "esp_log.h"
@@ -71,6 +77,12 @@ static struct Vm* g_vm = nullptr;
 
 /** Global V4-link port instance */
 static v4rtos::Esp32c6LinkPort* g_link = nullptr;
+
+/** Global DDT provider */
+static v4rtos::Esp32c6DdtProvider g_ddt_provider;
+
+/** Global LED HAL */
+static v4rtos::Esp32LedHal g_led_hal;
 
 // ==============================================================================
 // V4 VM Initialization
@@ -118,6 +130,38 @@ static int v4_init(void)
 
   ESP_LOGI(TAG, "V4 task scheduler initialized (10ms time slice)");
 
+  return 0;
+}
+
+// ==============================================================================
+// V4-std Initialization
+// ==============================================================================
+
+/**
+ * @brief Initialize V4-std system
+ *
+ * Initializes:
+ * - DDT (Device Descriptor Table)
+ * - LED HAL
+ * - SYS call handlers
+ *
+ * @return 0 on success, negative error code on failure
+ */
+static int v4std_init(void)
+{
+  // Set DDT provider
+  v4std::Ddt::set_provider(&g_ddt_provider);
+  ESP_LOGI(TAG, "DDT provider registered (2 devices)");
+
+  // Set LED HAL
+  v4std::set_led_hal(&g_led_hal);
+  ESP_LOGI(TAG, "LED HAL registered");
+
+  // Register LED SYS handlers
+  v4std::register_led_sys_handlers();
+  ESP_LOGI(TAG, "LED SYS handlers registered");
+
+  ESP_LOGI(TAG, "V4-std initialized");
   return 0;
 }
 
@@ -197,7 +241,7 @@ extern "C" void app_main(void)
   vTaskDelay(pdMS_TO_TICKS(200));
 
   // Step 3: Initialize V4 VM and task system
-  ESP_LOGI(TAG, "[3/4] Initializing V4 VM and task system...");
+  ESP_LOGI(TAG, "[3/5] Initializing V4 VM and task system...");
   if (v4_init() != 0)
   {
     ESP_LOGE(TAG, "V4 initialization failed");
@@ -217,8 +261,20 @@ extern "C" void app_main(void)
   }
   vTaskDelay(pdMS_TO_TICKS(200));
 
-  // Step 4: Initialize V4-link protocol
-  ESP_LOGI(TAG, "[4/4] Initializing V4-link protocol...");
+  // Step 4: Initialize V4-std
+  ESP_LOGI(TAG, "[4/5] Initializing V4-std...");
+  if (v4std_init() != 0)
+  {
+    ESP_LOGE(TAG, "V4-std initialization failed");
+    ESP_LOGE(TAG, "System halted.");
+    while (1)
+    {
+      vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+  }
+
+  // Step 5: Initialize V4-link protocol
+  ESP_LOGI(TAG, "[5/5] Initializing V4-link protocol...");
   g_link = new v4rtos::Esp32c6LinkPort(g_vm, 512);
   if (g_link == nullptr)
   {

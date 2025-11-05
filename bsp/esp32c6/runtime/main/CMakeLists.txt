@@ -113,6 +113,8 @@ idf_component_register(
   "panic_handler.cpp"
   "v4_link_port.cpp"
   "v4_task_platform_esp32.cpp"
+  "esp32c6_ddt_provider.cpp"
+  "esp32_led_hal.cpp"
   ${V4_SRCS}
   ${V4HAL_SRCS}
   ${V4LINK_SRCS}
@@ -128,7 +130,8 @@ idf_component_register(
   freertos
   esp_system
   esp_timer
-  log)
+  log
+  v4std)
 
 # ==============================================================================
 # Compiler Options
