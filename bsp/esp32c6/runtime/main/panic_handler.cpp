@@ -7,6 +7,7 @@
 
 #include "panic_handler.hpp"
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstring>
 
@@ -99,7 +100,7 @@ static void handle_panic(void* user_data, const V4PanicInfo* info)
   ESP_LOGE(TAG, "╚═══════════════════════════════════════════════════════════╝");
 
   // Log error code and name
-  ESP_LOGE(TAG, "Error Code:    %d (%s)", info->error_code,
+  ESP_LOGE(TAG, "Error Code:    %" PRId32 " (%s)", info->error_code,
            get_error_name(info->error_code));
 
   // Log program counter
