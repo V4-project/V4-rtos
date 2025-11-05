@@ -26,18 +26,40 @@ V4 Runtime is a lightweight Forth runtime environment built on FreeRTOS for reso
 
 ## Quick Start (10 minutes)
 
-```bash
-# 1. Clone repository
-git clone https://github.com/V4-project/V4-runtime.git
-cd V4-runtime
+### Prerequisites
+- ESP32-C6 board (M5Stack NanoC6 or similar)
+- ESP-IDF v5.1+ installed and sourced (`. $HOME/esp/esp-idf/export.sh`)
+- USB cable
 
-# 2. Flash V4 runtime to ESP32-C6
-cd bsp/esp32c6/runtime
+### Option 1: V4 REPL Runtime (Interactive Forth)
+
+```bash
+# Navigate to V4-runtime (if in V4-project workspace)
+cd V4-runtime/bsp/esp32c6/runtime
+
+# Build and flash
 idf.py build flash monitor
 
-# 3. Compile and send Forth program (when v4_cli is ready)
-v4c tools/examples/hello.fth -o hello.bin
-v4flash -p /dev/ttyUSB0 hello.bin
+# Expected output:
+# V4 Runtime initialized
+# V4 REPL ready
+# v4>
+```
+
+You can now type Forth commands interactively!
+
+### Option 2: Hello RTOS Example (Task Demo)
+
+```bash
+# Navigate to example
+cd bsp/esp32c6/examples/nanoc6/hello-rtos
+
+# Build and flash
+idf.py build flash monitor
+
+# Expected output:
+# [Task 1] Hello from task 1!
+# [Task 2] Hello from task 2!
 ```
 
 See [Getting Started Guide](docs/getting-started.md) for detailed instructions.

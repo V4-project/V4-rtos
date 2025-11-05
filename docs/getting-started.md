@@ -35,15 +35,71 @@ git checkout v5.1.2
 . $HOME/esp/esp-idf/export.sh
 ```
 
-## Step 2: Clone V4 Runtime
+## Step 2: Get V4 Runtime
 
+Choose one of the following:
+
+**Option A: Clone standalone repository**
 ```bash
-# Clone the repository
 git clone https://github.com/V4-project/V4-runtime.git
 cd V4-runtime
 ```
 
-## Step 3: Build and Flash Hello RTOS Example
+**Option B: Use V4-project workspace** (Recommended)
+```bash
+cd V4-project/V4-runtime
+```
+
+The V4-project workspace includes all dependencies pre-configured.
+
+## Step 3: Choose Your Starting Point
+
+V4 Runtime offers two ways to get started:
+
+### Option A: V4 REPL Runtime (Interactive Forth - Recommended)
+
+Build and flash the interactive REPL:
+
+```bash
+# Navigate to runtime application
+cd bsp/esp32c6/runtime
+
+# Build
+idf.py build
+
+# Flash to device (connect your board via USB)
+idf.py flash
+
+# Monitor serial output
+idf.py monitor
+```
+
+Expected output:
+
+```
+I (xxx) main: V4 Runtime initialized
+I (xxx) main: V4 REPL ready
+v4>
+```
+
+Now try some Forth commands:
+
+```forth
+v4> 2 3 +
+ ok [1]: 5
+
+v4> : SQUARE DUP * ;
+ ok
+
+v4> 5 SQUARE
+ ok [1]: 25
+```
+
+Press `Ctrl+]` to exit the monitor.
+
+### Option B: Hello RTOS Example (Task Demo)
+
+Build and flash a simple multi-tasking example:
 
 ```bash
 # Navigate to the hello-rtos example
@@ -75,7 +131,56 @@ Starting scheduler...
 
 Press `Ctrl+]` to exit the monitor.
 
-## Step 4: Understanding the Example
+## Step 4: Exploring V4 Runtime
+
+### If you chose V4 REPL Runtime
+
+The interactive REPL allows you to:
+
+1. **Execute Forth commands** - Try basic arithmetic and stack operations
+2. **Define words** - Create reusable functions
+3. **Control GPIO** - Blink LEDs, read sensors (using SYS instructions)
+
+Try these examples:
+
+```forth
+v4> 1 2 3
+ ok [3]: 1 2 3
+
+v4> .stack
+Data Stack (depth: 3):
+  [0]: 1 (0x00000001)
+  [1]: 2 (0x00000002)
+  [2]: 3 (0x00000003)
+
+v4> DROP DROP DROP
+ ok
+
+v4> : DOUBLE 2 * ;
+ ok
+
+v4> 21 DOUBLE
+ ok [1]: 42
+```
+
+**GPIO Control Example** (if LED connected to GPIO7):
+
+```forth
+v4> 7 1 SYS 0x00 DROP   ( Initialize GPIO7 as output )
+ ok
+
+v4> 7 1 SYS 0x01 DROP   ( Set GPIO7 HIGH )
+ ok
+
+v4> 7 0 SYS 0x01 DROP   ( Set GPIO7 LOW )
+ ok
+```
+
+Key files:
+- `bsp/esp32c6/runtime/main/main.cpp` - Main REPL application
+- `bsp/esp32c6/runtime/main/CMakeLists.txt` - Build configuration
+
+### If you chose Hello RTOS Example
 
 The hello-rtos example demonstrates:
 
@@ -85,12 +190,10 @@ The hello-rtos example demonstrates:
 
 Key files:
 
-- `main/main.c` - Application entry point
+- `bsp/esp32c6/examples/nanoc6/hello-rtos/main/main.c` - Application entry point
 - `main/CMakeLists.txt` - Component build configuration
 - `CMakeLists.txt` - Project configuration
 - `sdkconfig` - ESP-IDF configuration
-
-## Step 5: Modify and Rebuild
 
 Try modifying the example:
 
