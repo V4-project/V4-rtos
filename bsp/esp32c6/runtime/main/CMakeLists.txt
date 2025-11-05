@@ -153,4 +153,4 @@ target_compile_options(
           $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
 
 # Platform defines
-target_compile_definitions(${COMPONENT_LIB} PRIVATE HAL_PLATFORM_ESP32 V4_EMBEDDED)
+target_compile_definitions(${COMPONENT_LIB} PRIVATE HAL_PLATFORM_ESP32 V4_EMBEDDED V4_USE_V4STD)
