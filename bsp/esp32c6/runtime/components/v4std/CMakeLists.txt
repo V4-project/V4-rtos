@@ -1,7 +1,12 @@
 # V4-std ESP-IDF Component
 # Links to V4-std library in V4-project/V4-std
 
-set(V4STD_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../V4-std")
+# Support both Docker (V4_STD_PATH env var) and local builds (relative path)
+if(DEFINED ENV{V4_STD_PATH})
+  set(V4STD_DIR "$ENV{V4_STD_PATH}")
+else()
+  set(V4STD_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../V4-std")
+endif()
 
 # V4-std source files
 set(COMPONENT_SRCS
@@ -13,12 +18,15 @@ set(COMPONENT_SRCS
 # Include directories
 set(COMPONENT_ADD_INCLUDEDIRS
     "${V4STD_DIR}/include"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated"  # For generated sys_ids.h
+    # Note: generated directory is added via target_include_directories after register_component
 )
 
 set(COMPONENT_REQUIRES)
 
 register_component()
+
+# Create generated directory before build
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated/v4std")
 
 # Generate sys_ids.h from v4sys_ids.def
 set(V4SYS_IDS_DEF "${V4STD_DIR}/include/v4std/v4sys_ids.def")
